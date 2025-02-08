@@ -3,7 +3,7 @@ export function svgBuilder(category: string,
     glasses_iterator: number,
     grippables_iterator: number,
     hats_iterator: number,
-    tops_iterator: number):any {
+    tops_iterator: number): any {
     const Accessories: any = {
         'bottoms_svg_bundle': {
             '__neither': '',
@@ -264,6 +264,5 @@ export function svgBuilder(category: string,
         grippables_bundle_length: grippables_bundle.length,
         hats_bundle_length: hats_bundle.length,
         tops_bundle_length: tops_bundle.length,
-        
     };
 };

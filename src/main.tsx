@@ -47,7 +47,7 @@ Devvit.addCustomPostType({
   height: 'tall',
   render: (context) => {
     const [iterator_, setIterator_] = useState(0);
-    const [category, setcategory] = useState('none');
+    const [category, setcategory] = useState('grippables');
     //const [loadRedis, set_loadRedis] = useState(true);
     const [bottoms_iterator, set_bottoms_iterator] = useState(0);
     const [glasses_iterator, set_glasses_iterator] = useState(0);
@@ -63,9 +63,8 @@ Devvit.addCustomPostType({
     };
     //if(loadRedis){
     //set_loadRedis(false);
-      
-    //const currentUser = await context.reddit.getCurrentUser();
-    //}
+
+    //const currentUser = await context.reddit.getCurrentUser();}
     const svgElement = svgBuilder(
       category,
       bottoms_iterator,
@@ -77,15 +76,18 @@ Devvit.addCustomPostType({
       return function () {
         if (category !== 'none') {
           iterators[`set_${category}_iterator`](iterators[`${category}_iterator`]);
+          setIterator_(iterators[`${category}_iterator`]);
+        } else {
+          setIterator_(0);
         }
-        setIterator_(iterators[`${category}_iterator`]);
-        setcategory(newCat);
+        setcategory(newCat);        
+        setIterator_(iterators[`${newCat}_iterator`]);
       };
     };
     function set_iterator(sign: "+" | "-"): any {
       return function (): void {
         const newItem = iterator_ + Number(`${sign}1`);
-        setIterator_(newItem);
+        setIterator_(newItem !== newItem ? 0 : newItem);
         if (category !== 'none') {
           iterators[`set_${category}_iterator`](newItem);
         }
@@ -109,11 +111,11 @@ Devvit.addCustomPostType({
           </button>
         </hstack>
         <hstack gap="medium">
-          <button appearance={category === 'bottoms' ? "primary" : "secondary"} onPress={setNewCategory('bottoms')}>bottoms</button>
-          <button appearance={category === 'glasses' ? "primary" : "secondary"} onPress={setNewCategory('glasses')}>glasses</button>
-          <button appearance={category === 'grippables' ? "primary" : "secondary"} onPress={setNewCategory('grippables')}>grippables</button>
-          <button appearance={category === 'hats' ? "primary" : "secondary"} onPress={setNewCategory('hats')}>hats</button>
-          <button appearance={category === 'tops' ? "primary" : "secondary"} onPress={setNewCategory('tops')}>tops</button>
+          <button appearance={category === 'bottoms' ? "primary" : "secondary"} onPress={setNewCategory('bottoms')}>bottoms ({bottoms_iterator})</button>
+          <button appearance={category === 'glasses' ? "primary" : "secondary"} onPress={setNewCategory('glasses')}>glasses ({glasses_iterator})</button>
+          <button appearance={category === 'grippables' ? "primary" : "secondary"} onPress={setNewCategory('grippables')}>grippables ({grippables_iterator})</button>
+          <button appearance={category === 'hats' ? "primary" : "secondary"} onPress={setNewCategory('hats')}>hats ({hats_iterator})</button>
+          <button appearance={category === 'tops' ? "primary" : "secondary"} onPress={setNewCategory('tops')}>tops ({tops_iterator})</button>
         </hstack>
         <hstack gap="medium">
           <button appearance="success" disabled={true} onPress={async function () {/*
