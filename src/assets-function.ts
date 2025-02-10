@@ -1,4 +1,5 @@
-export function svgBuilder(category: string,
+// category
+export function svgBuilder(
     bottoms_iterator: number,
     glasses_iterator: number,
     grippables_iterator: number,

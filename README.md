@@ -4,7 +4,23 @@ its a snoo creator, what else do i need to say?
 
 ## change log
 
-note x.x.x.Y versions are development versions
+note x.x.x.Y versions are development versions and not recorded
+
+### 0.2.4
+
+updated readme
+
+### 0.2.3
+
+bugfix?
+
+### 0.2.2
+
+publishing
+
+### 0.2.1
+
+removed editor buttons on user snooposts
 
 ### 0.2.0
 

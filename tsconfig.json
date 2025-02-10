@@ -2,6 +2,6 @@
   "extends": "@devvit/public-api/devvit.tsconfig.json",
   "compilerOptions": {
     "allowImportingTsExtensions": true,
-    "noEmit":true
+    "noEmit": true
   }
 }
