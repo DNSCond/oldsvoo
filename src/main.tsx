@@ -1,15 +1,15 @@
 // Learn more at developers.reddit.com/docs
-import { Devvit, useState, svg } from '@devvit/public-api';
+import { Devvit, useState, useAsync } from '@devvit/public-api';
 import { svgBuilder } from './assets-function.ts';
 
 Devvit.configure({
   redditAPI: true,
-  //redis: true,
+  redis: true,
 });
 
 // Add a menu item to the subreddit menu for instantiating the new experience post
 Devvit.addMenuItem({
-  label: 'Add my post',
+  label: 'create snoopost',
   location: 'subreddit',
   forUserType: 'moderator',
   onPress: async (_event, context) => {
@@ -18,7 +18,7 @@ Devvit.addMenuItem({
 
     const subreddit = await reddit.getCurrentSubreddit();
     const post = await reddit.submitPost({
-      title: 'My devvit post',
+      title: 'Snoovatar (old.reddit)',
       subredditName: subreddit.name,
       // The preview appears while the post loads
       preview: create_preview(),
@@ -34,9 +34,44 @@ function indent_codeblock(string: string) {
   return '    ' + normalize_newlines(string).replace(/\n/g, '\n    ');
 }
 function create_preview() {
+  const category = 'grippables', iterator_ = 0;
+  const bottoms_iterator = 0, glasses_iterator = 0, grippables_iterator = 0, hats_iterator = 0, tops_iterator = 0;
+  const svgElement = svgBuilder(
+    category,
+    bottoms_iterator,
+    glasses_iterator,
+    grippables_iterator,
+    hats_iterator,
+    tops_iterator);
   return (
-    <vstack height="100%" width="100%" alignment="middle center">
-      <text size="large">Loading ...</text>
+    <vstack height="100%" width="100%" gap="medium" alignment="center middle">
+      <image
+        imageWidth={400}
+        imageHeight={400}
+        width="200px"
+        height="200px"
+        url={svgElement.output} />
+      <hstack gap="medium">
+        <button appearance="primary" disabled={true}>
+          &lt;
+        </button>
+        <text>loading</text>
+        <button appearance="primary" disabled={true}>
+          &gt;
+        </button>
+      </hstack>
+      <hstack gap="medium">
+        <button appearance={"secondary"} disabled={true}>hats ({hats_iterator})</button>
+        <button appearance={"secondary"} disabled={true}>glasses ({glasses_iterator})</button>
+        <button appearance={"secondary"} disabled={true}>grippables ({grippables_iterator})</button>
+      </hstack>
+      <hstack gap="medium">
+        <button appearance={"secondary"} disabled={true}>tops ({tops_iterator})</button>
+        <button appearance={"secondary"} disabled={true}>bottoms ({bottoms_iterator})</button>
+      </hstack>
+      <hstack gap="medium">
+        <button appearance="success" disabled={true}>share it! (make a post about it)</button>
+      </hstack>
     </vstack>
   );
 }
@@ -48,7 +83,6 @@ Devvit.addCustomPostType({
   render: (context) => {
     const [iterator_, setIterator_] = useState(0);
     const [category, setcategory] = useState('grippables');
-    //const [loadRedis, set_loadRedis] = useState(true);
     const [bottoms_iterator, set_bottoms_iterator] = useState(0);
     const [glasses_iterator, set_glasses_iterator] = useState(0);
     const [grippables_iterator, set_grippables_iterator] = useState(0);
@@ -59,12 +93,26 @@ Devvit.addCustomPostType({
       glasses_iterator, set_glasses_iterator,
       grippables_iterator, set_grippables_iterator,
       hats_iterator, set_hats_iterator,
-      tops_iterator, set_tops_iterator,
+      tops_iterator, set_tops_iterator
     };
-    //if(loadRedis){
-    //set_loadRedis(false);
-
-    //const currentUser = await context.reddit.getCurrentUser();}
+    useAsync(async function () {
+      return await context.redis.get(`user-iterator-${context.postId}`);
+    }, {
+      finally: function (data, error) {
+        if (!error) {
+          if (data) {
+            const redisData = JSON.parse(data);
+            if (redisData) {
+              set_bottoms_iterator(redisData['bottoms_iterator']);
+              set_glasses_iterator(redisData['glasses_iterator']);
+              set_grippables_iterator(redisData['grippables_iterator']);
+              set_hats_iterator(redisData['hats_iterator']);
+              set_tops_iterator(redisData['tops_iterator']);
+            }
+          }
+        }
+      },
+    });
     const svgElement = svgBuilder(
       category,
       bottoms_iterator,
@@ -80,7 +128,7 @@ Devvit.addCustomPostType({
         } else {
           setIterator_(0);
         }
-        setcategory(newCat);        
+        setcategory(newCat);
         setIterator_(iterators[`${newCat}_iterator`]);
       };
     };
@@ -98,8 +146,8 @@ Devvit.addCustomPostType({
         <image
           imageWidth={400}
           imageHeight={400}
-          width="400px"
-          height="300px"
+          width="200px"
+          height="200px"
           url={svgElement.output} />
         <hstack gap="medium">
           <button appearance="primary" onPress={set_iterator('-')}>
@@ -111,14 +159,16 @@ Devvit.addCustomPostType({
           </button>
         </hstack>
         <hstack gap="medium">
-          <button appearance={category === 'bottoms' ? "primary" : "secondary"} onPress={setNewCategory('bottoms')}>bottoms ({bottoms_iterator})</button>
+          <button appearance={category === 'hats' ? "primary" : "secondary"} onPress={setNewCategory('hats')}>hats ({hats_iterator})</button>
           <button appearance={category === 'glasses' ? "primary" : "secondary"} onPress={setNewCategory('glasses')}>glasses ({glasses_iterator})</button>
           <button appearance={category === 'grippables' ? "primary" : "secondary"} onPress={setNewCategory('grippables')}>grippables ({grippables_iterator})</button>
-          <button appearance={category === 'hats' ? "primary" : "secondary"} onPress={setNewCategory('hats')}>hats ({hats_iterator})</button>
-          <button appearance={category === 'tops' ? "primary" : "secondary"} onPress={setNewCategory('tops')}>tops ({tops_iterator})</button>
         </hstack>
         <hstack gap="medium">
-          <button appearance="success" disabled={true} onPress={async function () {/*
+          <button appearance={category === 'tops' ? "primary" : "secondary"} onPress={setNewCategory('tops')}>tops ({tops_iterator})</button>
+          <button appearance={category === 'bottoms' ? "primary" : "secondary"} onPress={setNewCategory('bottoms')}>bottoms ({bottoms_iterator})</button>
+        </hstack>
+        <hstack gap="medium">
+          <button appearance="success" disabled={false} onPress={async function () {
             const currentUser = await context.reddit.getCurrentUser();
             if (currentUser) {
               context.ui.showToast("Submitting your post - upon completion you'll navigate there.");
@@ -127,18 +177,18 @@ Devvit.addCustomPostType({
                 subredditName: (await context.reddit.getCurrentSubreddit()).name,
                 preview: create_preview(),
               });
-              context.redis.set(`user-iterator-${currentUser.id}`, JSON.stringify({
+              await context.redis.set(`user-iterator-${post.id}`, JSON.stringify({
                 bottoms_iterator, glasses_iterator, grippables_iterator, hats_iterator, tops_iterator
               }));
               context.ui.navigateTo(post);
             } else {
               context.ui.showToast("Sorry. only accounts with username can post");
-            }*/}}>share it! (make a post about it)</button>
+            }
+          }}>share it! (make a post about it)</button>
         </hstack>
-      </vstack >
+      </vstack>
     );
   },
 });
 
 export default Devvit;
-
