@@ -6,6 +6,10 @@ its a snoo creator, what else do i need to say?
 
 note x.x.x.Y versions are development versions and not recorded
 
+### 0.2.6
+
+buggy mess, please dont use
+
 ### 0.2.5
 
 revert
