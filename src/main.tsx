@@ -41,27 +41,6 @@ function create_preview() {
     grippables_iterator,
     hats_iterator,
     tops_iterator);
-  /*<hstack gap="medium">
-        <button appearance="primary" disabled={true}>
-          &lt;
-        </button>
-        <text>loading</text>
-        <button appearance="primary" disabled={true}>
-          &gt;
-        </button>
-      </hstack>
-      <hstack gap="medium">
-        <button appearance={"secondary"} disabled={true}>hats ({hats_iterator})</button>
-        <button appearance={"secondary"} disabled={true}>glasses ({glasses_iterator})</button>
-        <button appearance={"secondary"} disabled={true}>grippables ({grippables_iterator})</button>
-      </hstack>
-      <hstack gap="medium">
-        <button appearance={"secondary"} disabled={true}>tops ({tops_iterator})</button>
-        <button appearance={"secondary"} disabled={true}>bottoms ({bottoms_iterator})</button>
-      </hstack>
-      <hstack gap="medium">
-        <button appearance="success" disabled={true}>share it! (make a post about it)</button>
-      </hstack>*/
   return (
     <vstack height="100%" width="100%" gap="medium" alignment="center middle">
       <image imageWidth={400} imageHeight={400} width="200px" height="200px" url={svgElement.output} />
@@ -92,9 +71,6 @@ Devvit.addCustomPostType({
     const [tops_iterator, set_tops_iterator] = useState(0);
     const [postType, set_postType] = useState('editor');
     const [error_message, set_error_message] = useState('error_message');
-    //const [username, set_username] = useState(null);
-    //const [stars, set_stars] = useState(0);
-    //
     const iterators: any = {
       bottoms_iterator, set_bottoms_iterator,
       glasses_iterator, set_glasses_iterator,
@@ -171,7 +147,7 @@ Devvit.addCustomPostType({
         </>;
         break;
       case 'Rating':
-        /*const disabled = username === null;*/
+        // const disabled = username === null;
         insertion = <>
           <hstack gap="medium">
             <button appearance="primary" disabled={true}>
@@ -182,24 +158,7 @@ Devvit.addCustomPostType({
               &gt;
             </button>
           </hstack>
-        </>;/*<text>&#x2605; {stars}</text>
-
-        <hstack gap="medium">
-            <button appearance={stars === 1 ? "primary" : "secondary"} disabled={disabled} onPress={(function () { set_stars(1); })}>&#x2605;</button>
-            <button appearance={stars === 2 ? "primary" : "secondary"} disabled={disabled} onPress={(function () { set_stars(2); })}>&#x2605; &#x2605;</button>
-            <button appearance={stars === 3 ? "primary" : "secondary"} disabled={disabled} onPress={(function () { set_stars(3); })}>&#x2605; &#x2605; &#x2605;</button>
-          </hstack>
-          <hstack gap="medium">
-            <button appearance={stars === 4 ? "primary" : "secondary"} disabled={disabled} onPress={(function () { set_stars(4); })}>&#x2605; &#x2605; &#x2605; &#x2605;</button>
-            <button appearance={stars === 5 ? "primary" : "secondary"} disabled={disabled} onPress={(function () { set_stars(5); })}>&#x2605; &#x2605; &#x2605; &#x2605; &#x2605;</button>
-          </hstack>
-          <button appearance="success" disabled={disabled} onPress={async function () {
-            const currentUser = await context.reddit.getCurrentUser();
-            if (currentUser) {
-            } else {
-              context.ui.showToast("Sorry. only accounts with username can post");
-            }
-          }}>POST!</button>*/
+        </>;
         break;
       default:
         insertion = <>
@@ -217,29 +176,9 @@ Devvit.addCustomPostType({
             <button appearance={category === 'tops' ? "primary" : "secondary"} onPress={setNewCategory('tops')}>tops ({tops_iterator})</button>
             <button appearance={category === 'bottoms' ? "primary" : "secondary"} onPress={setNewCategory('bottoms')}>bottoms ({bottoms_iterator})</button>
           </hstack>
-          <hstack gap="medium">
-            <button appearance="success" disabled={false} onPress={async function () {
-              const currentUser = await context.reddit.getCurrentUser();
-              if (currentUser) {
-                context.ui.showToast("Submitting your post - upon completion you'll navigate there.");
-                const post = await context.reddit.submitPost({
-                  title: `u/${currentUser.username}'s new snoo (V${context.appVersion})`,
-                  subredditName: (await context.reddit.getCurrentSubreddit()).name,
-                  preview: create_preview(),
-                }); const username = currentUser.username;
-                await context.redis.set(`user-iterator-${post.id}`, JSON.stringify({
-                  username, bottoms_iterator, glasses_iterator,
-                  grippables_iterator, hats_iterator, tops_iterator
-                }));
-                context.ui.navigateTo(post);
-              } else {
-                context.ui.showToast("Sorry. only accounts with username can post");
-              }
-            }}>share it! (make a post about it)</button>
-          </hstack>
         </>;
         break;
-    }
+    }//-*/
     return (
       <vstack height="100%" width="100%" gap="medium" alignment="center middle">
         <image imageWidth={400} imageHeight={400} width="200px" height="200px" url={svgElement.output} />
