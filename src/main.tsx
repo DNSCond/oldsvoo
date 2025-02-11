@@ -118,7 +118,7 @@ Devvit.addCustomPostType({
               set_tops_iterator(redisData['tops_iterator']);
               set_postType('Rating');
             } else {
-              console.log(`JSON-error: ${data} ${error}`);
+              set_error_message(`JSON-error: ${data} ${error}`);
               set_postType('Errored');
             }
           }
@@ -204,13 +204,9 @@ Devvit.addCustomPostType({
       default:
         insertion = <>
           <hstack gap="medium">
-            <button appearance="primary" onPress={set_iterator('-')}>
-              &lt;
-            </button>
+            <button appearance="primary" onPress={set_iterator('-')}>&lt;</button>
             <text>{iterator_} / {String(svgElement[`${category}_bundle_length`] ?? '0')}</text>
-            <button appearance="primary" onPress={set_iterator('+')}>
-              &gt;
-            </button>
+            <button appearance="primary" onPress={set_iterator('+')}>&gt;</button>
           </hstack>
           <hstack gap="medium">
             <button appearance={category === 'hats' ? "primary" : "secondary"} onPress={setNewCategory('hats')}>hats ({hats_iterator})</button>
@@ -232,7 +228,7 @@ Devvit.addCustomPostType({
                   preview: create_preview(),
                 }); const username = currentUser.username;
                 await context.redis.set(`user-iterator-${post.id}`, JSON.stringify({
-                  username, bottoms_iterator, glasses_iterator, 
+                  username, bottoms_iterator, glasses_iterator,
                   grippables_iterator, hats_iterator, tops_iterator
                 }));
                 context.ui.navigateTo(post);
