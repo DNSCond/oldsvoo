@@ -1,5 +1,5 @@
 // Learn more at developers.reddit.com/docs
-import { Devvit, useState, useAsync, useForm } from '@devvit/public-api';
+import { Devvit, useState, useAsync } from '@devvit/public-api';
 import { svgBuilder } from './assets-function.ts';
 
 Devvit.configure({
@@ -27,12 +27,8 @@ Devvit.addMenuItem({
   },
 });
 
-function normalize_newlines(string: string) {
-  return String(string).replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-}
-function indent_codeblock(string: string) {
-  return '    ' + normalize_newlines(string).replace(/\n/g, '\n    ');
-}
+//function normalize_newlines(string: string) {return String(string).replace(/\r\n/g, '\n').replace(/\r/g, '\n');}
+//function indent_codeblock(string: string) {return '    ' + normalize_newlines(string).replace(/\n/g, '\n    ');}
 function create_preview() {
   const bottoms_iterator = 0, glasses_iterator = 0, grippables_iterator = 0, hats_iterator = 0, tops_iterator = 0;
   const svgElement = svgBuilder(
@@ -147,7 +143,6 @@ Devvit.addCustomPostType({
         </>;
         break;
       case 'Rating':
-        // const disabled = username === null;
         insertion = <>
           <hstack gap="medium">
             <button appearance="primary" disabled={true}>
@@ -176,9 +171,25 @@ Devvit.addCustomPostType({
             <button appearance={category === 'tops' ? "primary" : "secondary"} onPress={setNewCategory('tops')}>tops ({tops_iterator})</button>
             <button appearance={category === 'bottoms' ? "primary" : "secondary"} onPress={setNewCategory('bottoms')}>bottoms ({bottoms_iterator})</button>
           </hstack>
+          <button appearance="success" disabled={true} onPress={async function () {
+            const currentUser = await context.reddit.getCurrentUser(), subreddit = await context.reddit.getCurrentSubreddit();
+            if (currentUser && subreddit) {
+              context.ui.showToast("Submitting your post - upon completion you'll navigate there.");
+              const post = await context.reddit.submitPost({
+                title: `u/${currentUser.username}'s new snoo (${context.appVersion})`,
+                subredditName: subreddit.name, preview: create_preview(),
+              });
+              context.redis.set(`user-iterator-${post.id}`, JSON.stringify({
+                bottoms_iterator, glasses_iterator, grippables_iterator, hats_iterator, tops_iterator
+              }));
+              context.ui.navigateTo(post);
+            } else {
+              context.ui.showToast("Sorry. only accounts with username can post");
+            }
+          }}>share it! (make a post about it)</button>
         </>;
         break;
-    }//-*/
+    }
     return (
       <vstack height="100%" width="100%" gap="medium" alignment="center middle">
         <image imageWidth={400} imageHeight={400} width="200px" height="200px" url={svgElement.output} />

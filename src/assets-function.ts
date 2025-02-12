@@ -212,52 +212,13 @@ export function svgBuilder(
         glasses_bundle = Object.values(Accessories['glasses_svg_bundle']),
         grippables_bundle = Object.values(Accessories['grippables_svg_bundle']),
         hats_bundle = Object.values(Accessories['hats_svg_bundle']),
-        tops_bundle = Object.values(Accessories['tops_svg_bundle']);
-    bodyAccessories += bottoms_bundle.at(bottoms_iterator % bottoms_bundle.length);
-    headAccessories += glasses_bundle.at(glasses_iterator % glasses_bundle.length);
-    headAccessories += hats_bundle.at(hats_iterator % hats_bundle.length);
-    bodyAccessories += tops_bundle.at(tops_iterator % tops_bundle.length);
+        tops_bundle = Object.values(Accessories['tops_svg_bundle']);// @ts-ignore
+    bodyAccessories += bottoms_bundle.at(bottoms_iterator % bottoms_bundle.length);// @ts-ignore
+    headAccessories += glasses_bundle.at(glasses_iterator % glasses_bundle.length);// @ts-ignore
+    headAccessories += hats_bundle.at(hats_iterator % hats_bundle.length);// @ts-ignore
+    bodyAccessories += tops_bundle.at(tops_iterator % tops_bundle.length);// @ts-ignore
     headAccessories += grippables_bundle.at(grippables_iterator % grippables_bundle.length);
-    const snooBuilder1 = `<svg version="1.1" id="snoo-head" xmlns="http://www.w3.org/2000/svg" y="0px" viewBox="0 0 400 400">
-      <g class="SnooSeperator-body">
-          <g id="fill::snoo-body">
-              <ellipse fill="#FFFFFF" stroke="#000000" stroke-width="11" stroke-linejoin="round" cx="245.2" cy="284.3"
-                       rx="44.1" ry="53.2"/>
-              <ellipse fill="#FFFFFF" stroke="#000000" stroke-width="11" stroke-linejoin="round" cx="154.8" cy="284.3"
-                       rx="44.1" ry="53.2"/>
-              <path fill="#FFFFFF" stroke="#000000" stroke-width="11" stroke-linejoin="round"
-                    d="M175.9,392.9c0.6-1.9,0.9-3.8,0.9-5.9  c0-13.8-13.6-24.9-30.4-24.9s-30.4,11.2-30.4,25c0,2,0.3,4,0.9,5.9h59V392.9z"/>
-              <path fill="#FFFFFF" stroke="#000000" stroke-width="11" stroke-linejoin="round"
-                    d="M282.3,392.9c0.6-1.9,0.9-3.8,0.9-5.9  c0-13.8-13.6-24.9-30.4-24.9s-30.4,11.2-30.4,24.9c0,2,0.3,4,0.9,5.9H282.3z"/>
-              <path fill="#FFFFFF" stroke="#000000" stroke-width="11" stroke-linejoin="round"
-                    d="M184.9,392.9H215  c26.5-13.9,46.1-63.5,46.1-122.6c0-69.9-27.4-126.5-61.2-126.5s-61.2,56.6-61.2,126.5C138.8,329.4,158.4,379.1,184.9,392.9z"/>
-          </g>
-          <line fill="none" stroke="#000000" stroke-width="11" stroke-linejoin="round" x1="167.8" y1="392.9" x2="232.2"
-                y2="392.9"/>
-      </g>
-      <g class="SnooSeperator-body-accessories">${bodyAccessories}</g>
-      <g class="SnooSeperator-head">
-          <g id="snoo-body-f::fill::snoo-head">
-              <circle fill="#FFFFFF" stroke="#000000" stroke-width="11" cx="310.5" cy="118.5" r="27"/>
-              <circle fill="#FFFFFF" stroke="#000000" stroke-width="11" cx="89.5" cy="118.5" r="27"/>
-              <ellipse fill="#FFFFFF" stroke="#000000" stroke-width="11" cx="200" cy="155.6" rx="122.4" ry="79.9"/>
-              <circle fill="none" stroke="#000000" stroke-width="11" cx="297" cy="28" r="21.3"/>
-          </g>
-          <g id="eyes">
-              <circle fill="#FF4500" cx="156.9" cy="140" r="19.8"/>
-              <circle fill="#FF4500" cx="243.1" cy="140" r="19.8"/>
-          </g>
-          <g id="mouth">
-              <path fill="none" stroke="#000000" stroke-width="11" stroke-linecap="round"
-                    d="M158,192.4c9.3,10.1,29.5,13,42.1,12.7"/>
-              <path fill="none" stroke="#000000" stroke-width="11" stroke-linecap="round"
-                    d="M242.3,192.4c-9.3,10.1-29.5,13-42.1,12.7"/>
-          </g>
-          <polyline fill="none" stroke="#000000" stroke-width="11" stroke-linejoin="round"
-                    points="201,73.7 220.9,10.9 274.9,23.6 "/>
-      </g>
-      <g class="SnooSeperator-body-accessories">${headAccessories}</g>
-  </svg>`;
+    const snooBuilder1 = `<svg version="1.1" id="snoo-head" xmlns="http://www.w3.org/2000/svg" y="0px" viewBox="0 0 400 400"><g class="SnooSeperator-body">${Accessories['snoo-body_svg_bundle']['body']}</g><g class="SnooSeperator-body-accessories">${bodyAccessories}</g><g class="SnooSeperator-head">${Accessories['snoo-head_svg_bundle']['head']}</g><g class="SnooSeperator-body-accessories">${headAccessories}</g></svg>`;
     return {
         output: `data:image/svg+xml,${snooBuilder1}`,
         bottoms_bundle_length: bottoms_bundle.length,
