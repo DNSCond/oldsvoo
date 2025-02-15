@@ -21,7 +21,7 @@ Devvit.addMenuItem({
       title: `Snoovatar (${context.appVersion})`,
       subredditName: subreddit.name,
       // The preview appears while the post loads
-      preview: create_preview(),
+      preview: create_preview(context.appVersion),
     });
     ui.navigateTo(post);
   },
@@ -29,7 +29,7 @@ Devvit.addMenuItem({
 
 //function normalize_newlines(string: string) {return String(string).replace(/\r\n/g, '\n').replace(/\r/g, '\n');}
 //function indent_codeblock(string: string) {return '    ' + normalize_newlines(string).replace(/\n/g, '\n    ');}
-function create_preview() {
+function create_preview(appVersion: string) {
   const bottoms_iterator = 0, glasses_iterator = 0, grippables_iterator = 0, hats_iterator = 0, tops_iterator = 0;
   const svgElement = svgBuilder(
     bottoms_iterator,
@@ -44,7 +44,7 @@ function create_preview() {
         <button appearance="primary" disabled={true}>
           &lt;
         </button>
-        <text>loading</text>
+        <text>loading ({appVersion})</text>
         <button appearance="primary" disabled={true}>
           &gt;
         </button>
@@ -74,6 +74,7 @@ Devvit.addCustomPostType({
       hats_iterator, set_hats_iterator,
       tops_iterator, set_tops_iterator,
     };
+    // @ts-ignore
     useAsync(async function () {
       return await context.redis.get(`user-iterator-${context.postId}`);
     }, {
@@ -148,11 +149,14 @@ Devvit.addCustomPostType({
             <button appearance="primary" disabled={true}>
               &lt;
             </button>
-            <text>Rating</text>
+            <text>their snoo</text>
             <button appearance="primary" disabled={true}>
               &gt;
             </button>
           </hstack>
+          <button appearance="caution" onPress={function () {
+            set_postType('editor');
+          }}>Remix</button>
         </>;
         break;
       default:
@@ -171,13 +175,13 @@ Devvit.addCustomPostType({
             <button appearance={category === 'tops' ? "primary" : "secondary"} onPress={setNewCategory('tops')}>tops ({tops_iterator})</button>
             <button appearance={category === 'bottoms' ? "primary" : "secondary"} onPress={setNewCategory('bottoms')}>bottoms ({bottoms_iterator})</button>
           </hstack>
-          <button appearance="success" disabled={true} onPress={async function () {
+          <button appearance="success" onPress={async function () {
             const currentUser = await context.reddit.getCurrentUser(), subreddit = await context.reddit.getCurrentSubreddit();
             if (currentUser && subreddit) {
               context.ui.showToast("Submitting your post - upon completion you'll navigate there.");
               const post = await context.reddit.submitPost({
                 title: `u/${currentUser.username}'s new snoo (${context.appVersion})`,
-                subredditName: subreddit.name, preview: create_preview(),
+                subredditName: subreddit.name, preview: create_preview(context.appVersion),
               });
               context.redis.set(`user-iterator-${post.id}`, JSON.stringify({
                 bottoms_iterator, glasses_iterator, grippables_iterator, hats_iterator, tops_iterator
