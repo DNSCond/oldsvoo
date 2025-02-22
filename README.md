@@ -19,6 +19,14 @@ a post "u/[username]'s new snoo" will be created. this post will display the con
 
 note x.x.x.Y versions are development versions and not recorded
 
+### revamped changelog
+
+- thats about it
+
+## changelog (oldstyle)
+
+this will not be updated
+
 ### 0.2.7
 
 minor changes, added the share button back, and published it again (submitted it for review)
