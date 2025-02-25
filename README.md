@@ -19,6 +19,10 @@ a post "u/[username]'s new snoo" will be created. this post will display the con
 
 note x.x.x.Y versions are development versions and not recorded
 
+### 0.2.11
+
+- added deletion of data
+
 ### revamped changelog
 
 - thats about it

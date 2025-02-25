@@ -52,7 +52,13 @@ function create_preview(appVersion: string) {
     </vstack>
   );
 }
-
+Devvit.addTrigger({
+  event: 'PostDelete',
+  onEvent: async function (event, context) {
+    const postId = event.postId;
+    await context.redis.del(`user-iterator-${postId}`);
+  },
+});
 // Add a post type definition
 Devvit.addCustomPostType({
   name: 'Experience Post',
