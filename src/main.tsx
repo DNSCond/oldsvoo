@@ -36,7 +36,8 @@ function create_preview(appVersion: string) {
     glasses_iterator,
     grippables_iterator,
     hats_iterator,
-    tops_iterator);
+    tops_iterator,
+  "#ffffff");
   return (
     <vstack height="100%" width="100%" gap="medium" alignment="center middle">
       <image imageWidth={400} imageHeight={400} width="200px" height="200px" url={svgElement.output} />

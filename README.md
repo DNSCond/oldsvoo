@@ -19,11 +19,12 @@ a post "u/[username]'s new snoo" will be created. this post will display the con
 
 note x.x.x.Y versions are development versions and not recorded
 
-### 0.2.12
+### 0.2.12 and 0.2.13
 
 - added color support
 - fixed the bug where the hands are green.
 - note the default color is \#ffffff.
+- 0.2.13: added placeholder to white
 
 ### 0.2.11
 
