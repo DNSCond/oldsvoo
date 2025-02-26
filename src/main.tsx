@@ -37,7 +37,7 @@ function create_preview(appVersion: string) {
     grippables_iterator,
     hats_iterator,
     tops_iterator,
-  "#ffffff");
+    "#ffffff");
   return (
     <vstack height="100%" width="100%" gap="medium" alignment="center middle">
       <image imageWidth={400} imageHeight={400} width="200px" height="200px" url={svgElement.output} />
@@ -116,7 +116,7 @@ Devvit.addCustomPostType({
               set_grippables_iterator(redisData['grippables_iterator']);
               set_hats_iterator(redisData['hats_iterator']);
               set_tops_iterator(redisData['tops_iterator']);
-              set_color(redisData['tops_iterator']??'#ffffff');
+              set_color(redisData['color'] ?? '#ffffff');
               set_postType('Rating');
             } else {
               set_error_message(`JSON-error: ${data} ${error}`);
