@@ -1,5 +1,5 @@
 // Learn more at developers.reddit.com/docs
-import { Devvit, useState, useAsync } from '@devvit/public-api';
+import { Devvit, useState, useAsync, useForm } from '@devvit/public-api';
 import { svgBuilder } from './assets-function.ts';
 
 Devvit.configure({
@@ -65,6 +65,7 @@ Devvit.addCustomPostType({
   height: 'tall',
   render: (context) => {
     const [iterator_, setIterator_] = useState(0);
+    const [color, set_color] = useState('#ffffff');
     const [category, setcategory] = useState('grippables');
     const [bottoms_iterator, set_bottoms_iterator] = useState(0);
     const [glasses_iterator, set_glasses_iterator] = useState(0);
@@ -80,6 +81,25 @@ Devvit.addCustomPostType({
       hats_iterator, set_hats_iterator,
       tops_iterator, set_tops_iterator,
     };
+    const form: any = useForm({
+      title: 'Create a Quiz!', description: 'Create an quiz for users to complete',
+      fields: [{
+        type: "string",
+        name: `color`,
+        label: `Snoo Color`,
+        helpText: "hex 6 part only",
+        placeholder: `${color}`, required: true,
+      }], acceptLabel: 'paint!', cancelLabel: 'Cancel',
+    }, async function (values) {
+      const newColor = String(values.color).match(/^#?([a-f0-9]{6})$/i);
+      if (newColor) {
+        context.ui.showToast("color updated!");
+        set_color(`#${newColor[1]}`);
+      } else {
+        context.ui.showToast("invalid color");
+      }
+    });
+
     // @ts-ignore
     useAsync(async function () {
       return await context.redis.get(`user-iterator-${context.postId}`);
@@ -95,6 +115,7 @@ Devvit.addCustomPostType({
               set_grippables_iterator(redisData['grippables_iterator']);
               set_hats_iterator(redisData['hats_iterator']);
               set_tops_iterator(redisData['tops_iterator']);
+              set_color(redisData['tops_iterator']??'#ffffff');
               set_postType('Rating');
             } else {
               set_error_message(`JSON-error: ${data} ${error}`);
@@ -112,7 +133,8 @@ Devvit.addCustomPostType({
       glasses_iterator,
       grippables_iterator,
       hats_iterator,
-      tops_iterator);
+      tops_iterator,
+      color);
     function setNewCategory(newCat: string): any {
       return function () {
         if (iterators[`set_${category}_iterator`] !== undefined) {
@@ -178,6 +200,7 @@ Devvit.addCustomPostType({
             <button appearance={category === 'grippables' ? "primary" : "secondary"} onPress={setNewCategory('grippables')}>grippables ({grippables_iterator})</button>
           </hstack>
           <hstack gap="medium">
+            <button appearance={"bordered"} onPress={async function () { context.ui.showForm(form); }}>color {color}</button>
             <button appearance={category === 'tops' ? "primary" : "secondary"} onPress={setNewCategory('tops')}>tops ({tops_iterator})</button>
             <button appearance={category === 'bottoms' ? "primary" : "secondary"} onPress={setNewCategory('bottoms')}>bottoms ({bottoms_iterator})</button>
           </hstack>
@@ -190,7 +213,8 @@ Devvit.addCustomPostType({
                 subredditName: subreddit.name, preview: create_preview(context.appVersion),
               });
               context.redis.set(`user-iterator-${post.id}`, JSON.stringify({
-                bottoms_iterator, glasses_iterator, grippables_iterator, hats_iterator, tops_iterator
+                bottoms_iterator, glasses_iterator, grippables_iterator,
+                hats_iterator, tops_iterator, color
               }));
               context.ui.navigateTo(post);
             } else {

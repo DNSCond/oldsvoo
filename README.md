@@ -19,6 +19,12 @@ a post "u/[username]'s new snoo" will be created. this post will display the con
 
 note x.x.x.Y versions are development versions and not recorded
 
+### 0.2.12
+
+- added color support
+- fixed the bug where the hands are green.
+- note the default color is \#ffffff.
+
 ### 0.2.11
 
 - added deletion of data
