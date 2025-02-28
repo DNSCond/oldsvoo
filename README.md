@@ -2,6 +2,10 @@
 
 the old.reddit snoovatar creator, or just my adapation of it
 
+The Reddit mascot is property of Reddit, Inc. and is used with permission.
+
+(snoo is the reddit mascot).
+
 ## howto use
 
 install to your subreddit my clicking "Add to community".
@@ -18,6 +22,14 @@ a post "u/[username]'s new snoo" will be created. this post will display the con
 ## change log
 
 note x.x.x.Y versions are development versions and not recorded
+
+### 0.3.0
+
+added "The Reddit mascot is property of Reddit, Inc. and is used with permission." to the readme. (admin request)
+
+### 0.2.15
+
+this update wasnt supposed to happen
 
 ### 0.2.12 and 0.2.13 and 0.2.14
 
