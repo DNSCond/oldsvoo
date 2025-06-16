@@ -23,6 +23,16 @@ a post "u/[username]'s new snoo" will be created. this post will display the con
 
 note x.x.x.Y versions are development versions and not recorded
 
+### 0.3.2: updated ReadMe
+
+- updated ReadMe
+
+### 0.3.1: updated
+
+- ratings are implemented but hidden to the public
+- titles are now customizable
+- a comment explaining gets added to posts created with the bot.
+
 ### 0.3.0
 
 added "The Reddit mascot is property of Reddit, Inc. and is used with permission." to the readme. (admin request)

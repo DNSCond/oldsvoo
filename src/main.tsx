@@ -2,10 +2,9 @@
 import { Devvit, useState, useAsync, useForm } from '@devvit/public-api';
 import { svgBuilder } from './assets-function.ts';
 
-Devvit.configure({
-  redditAPI: true,
-  redis: true,
-});
+Devvit.configure({ redditAPI: true, redis: true });
+
+// Devvit.addSettings([{type: 'boolean', name: 'sticky', label: 'add a stickied comment with an explanation of snoovatarcreator?',},]);
 
 // Add a menu item to the subreddit menu for instantiating the new experience post
 Devvit.addMenuItem({
@@ -16,28 +15,18 @@ Devvit.addMenuItem({
     const { reddit, ui } = context;
     ui.showToast("Submitting your post - upon completion you'll navigate there.");
 
-    const subreddit = await reddit.getCurrentSubreddit();
+    const subredditName = await reddit.getCurrentSubredditName();
     const post = await reddit.submitPost({
-      title: `Snoovatar (${context.appVersion})`,
-      subredditName: subreddit.name,
-      // The preview appears while the post loads
-      preview: create_preview(context.appVersion),
+      title: `Snoovatar creator (${context.appVersion})`,
+      subredditName, preview: create_preview(context.appVersion),
     });
     ui.navigateTo(post);
   },
 });
 
-//function normalize_newlines(string: string) {return String(string).replace(/\r\n/g, '\n').replace(/\r/g, '\n');}
-//function indent_codeblock(string: string) {return '    ' + normalize_newlines(string).replace(/\n/g, '\n    ');}
 function create_preview(appVersion: string) {
-  const bottoms_iterator = 0, glasses_iterator = 0, grippables_iterator = 0, hats_iterator = 0, tops_iterator = 0;
-  const svgElement = svgBuilder(
-    bottoms_iterator,
-    glasses_iterator,
-    grippables_iterator,
-    hats_iterator,
-    tops_iterator,
-    "#ffffff");
+  const bottoms_iterator = 0, glasses_iterator = 0, grippables_iterator = 0, hats_iterator = 0, tops_iterator = 0,
+    svgElement = svgBuilder(bottoms_iterator, glasses_iterator, grippables_iterator, hats_iterator, tops_iterator, "#ffffff");
   return (
     <vstack height="100%" width="100%" gap="medium" alignment="center middle">
       <image imageWidth={400} imageHeight={400} width="200px" height="200px" url={svgElement.output} />
@@ -53,6 +42,7 @@ function create_preview(appVersion: string) {
     </vstack>
   );
 }
+
 Devvit.addTrigger({
   event: 'PostDelete',
   onEvent: async function (event, context) {
@@ -60,11 +50,19 @@ Devvit.addTrigger({
     await context.redis.del(`user-iterator-${postId}`);
   },
 });
+
+type saveData = {
+  bottoms_iterator: number, glasses_iterator: number, grippables_iterator: number,
+  hats_iterator: number, tops_iterator: number, color: string, allowRatings?: boolean,
+};
+
+//function returnSelf<M>(self:M):M{return self}
+
 // Add a post type definition
 Devvit.addCustomPostType({
   name: 'Experience Post',
   height: 'tall',
-  render: (context) => {
+  render(context) {
     const [iterator_, setIterator_] = useState(0);
     const [color, set_color] = useState('#ffffff');
     const [category, setcategory] = useState('grippables');
@@ -74,6 +72,7 @@ Devvit.addCustomPostType({
     const [hats_iterator, set_hats_iterator] = useState(0);
     const [tops_iterator, set_tops_iterator] = useState(0);
     const [postType, set_postType] = useState('editor');
+    const [allowRatings, set_allowRatings] = useState(false);
     const [error_message, set_error_message] = useState('error_message');
     const iterators: any = {
       bottoms_iterator, set_bottoms_iterator,
@@ -83,7 +82,7 @@ Devvit.addCustomPostType({
       tops_iterator, set_tops_iterator,
     };
     const form: any = useForm({
-      title: 'Create a Quiz!', description: 'Create an quiz for users to complete',
+      title: 'Change Snoo Color', description: 'Change the snoo\'s color',
       fields: [{
         type: "string",
         name: `color`,
@@ -100,6 +99,42 @@ Devvit.addCustomPostType({
         context.ui.showToast("invalid color");
       }
     });
+    const titleForm = useForm({
+      title: 'PostSettings', description: 'what to allow or not on your post',
+      fields: [
+        {
+          type: "string",
+          name: `title`,
+          label: `what to title your post?`,
+          defaultValue: `My New Soo`,
+          required: true,
+        },
+        /*{type: "boolean",name: `allowRatings`,label: `allow Ratings?`,
+          //helpText: "if true then users can leave ratings on your post, if false then the cant. this WILL NOT disable reddit\'s own voting",
+          helpText: 'currently ratings are disabled'
+        }*/
+      ], acceptLabel: 'submit', cancelLabel: 'cancel',
+    }, async function (values) {
+      const currentUser = await context.reddit.getCurrentUsername(), subredditName = await context.reddit.getCurrentSubredditName();
+      if (currentUser && subredditName) {
+        const title = `(u/${currentUser}): ` + values.title;
+        context.ui.showToast(`Submitting! ${title}`);
+        const post = await context.reddit.submitPost({
+          title, subredditName, preview: create_preview(context.appVersion),
+        }), allowRatings = false;//values.allowRatings;
+        context.redis.set(`user-iterator-${post.id}`, JSON.stringify({
+          bottoms_iterator, glasses_iterator, grippables_iterator,
+          hats_iterator, tops_iterator, color, allowRatings,
+        }));
+        context.ui.navigateTo(post);
+        // if (await context.settings.get('sticky'))
+        {
+          let text = `Hello, u/${currentUser}.\n\nThanks for using [snoovatar creator](https://developers.reddit.com/apps/snoovatarcreator)`;
+          text += ` (A devvit app created by antboiy).\n\nDevvit app posts are marked by the green APP Symbol and interactable\n\n\`${Date()}\``;
+          await (await post.addComment({ text })).distinguish(true);
+        }
+      } else context.ui.showToast("Sorry. only accounts with username can post");
+    });
 
     // @ts-ignore
     useAsync(async function () {
@@ -108,7 +143,7 @@ Devvit.addCustomPostType({
       finally: function (data, error) {
         if (!error) {
           if (data) {
-            const redisData = JSON.parse(String(data));
+            const redisData: saveData = JSON.parse(String(data));
             if (redisData) {
               //set_username(redisData.username ?? null);
               set_bottoms_iterator(redisData['bottoms_iterator']);
@@ -117,6 +152,7 @@ Devvit.addCustomPostType({
               set_hats_iterator(redisData['hats_iterator']);
               set_tops_iterator(redisData['tops_iterator']);
               set_color(redisData['color'] ?? '#ffffff');
+              set_allowRatings(Boolean(redisData['allowRatings']));
               set_postType('Rating');
             } else {
               set_error_message(`JSON-error: ${data} ${error}`);
@@ -129,22 +165,13 @@ Devvit.addCustomPostType({
         }
       },
     });
-    const svgElement = svgBuilder(
-      bottoms_iterator,
-      glasses_iterator,
-      grippables_iterator,
-      hats_iterator,
-      tops_iterator,
-      color);
+    const svgElement = svgBuilder(bottoms_iterator, glasses_iterator, grippables_iterator, hats_iterator, tops_iterator, color);
     function setNewCategory(newCat: string): any {
       return function () {
         if (iterators[`set_${category}_iterator`] !== undefined) {
           iterators[`set_${category}_iterator`](iterators[`${category}_iterator`]);
           setIterator_(iterators[`${category}_iterator`]);
-        } else {
-          setIterator_(0);
-        }
-        setcategory(newCat);
+        } else setIterator_(0); setcategory(newCat);
         setIterator_(iterators[`${newCat}_iterator`]);
       };
     };
@@ -173,20 +200,50 @@ Devvit.addCustomPostType({
         </>;
         break;
       case 'Rating':
-        insertion = <>
-          <hstack gap="medium">
-            <button appearance="primary" disabled={true}>
-              &lt;
-            </button>
-            <text>their snoo</text>
-            <button appearance="primary" disabled={true}>
-              &gt;
-            </button>
-          </hstack>
-          <button appearance="caution" onPress={function () {
-            set_postType('editor');
-          }}>Remix</button>
-        </>;
+        {
+          const appearance_rating = 'bordered', duato = function (_: number) {
+            context.ui.showToast('well that didnt do anything');
+          };
+          insertion = <>
+            <hstack gap="medium">
+              <button appearance="primary" disabled={true}>
+                &lt;
+              </button>
+              <text>their snoo</text>
+              <button appearance="primary" disabled={true}>
+                &gt;
+              </button>
+            </hstack>
+            <hstack gap="medium">
+              <button appearance="caution" onPress={function () {
+                set_postType('editor');
+              }}>Remix</button>
+              {allowRatings ? (<>
+                <button appearance={appearance_rating} onPress={function () {
+                  duato(1);
+                }} icon="star">1</button>
+                <button appearance={appearance_rating} onPress={function () {
+                  duato(2);
+                }} icon="star">2</button>
+              </>) : <></>}
+            </hstack>
+            {allowRatings ? (<>
+              <hstack gap="medium">
+                <button appearance={appearance_rating} onPress={function () {
+                  duato(3);
+                }} icon="star">3</button>
+                <button appearance={appearance_rating} onPress={function () {
+                  duato(4);
+                  context.ui.showToast("are you pressing butone");
+                }} icon="star">4</button>
+                <button appearance={appearance_rating} onPress={function () {
+                  duato(5);
+                  context.ui.showToast('window');
+                }} icon="star">5</button>
+              </hstack>
+            </>) : <></>}
+          </>;
+        }
         break;
       default:
         insertion = <>
@@ -206,21 +263,7 @@ Devvit.addCustomPostType({
             <button appearance={category === 'bottoms' ? "primary" : "secondary"} onPress={setNewCategory('bottoms')}>bottoms ({bottoms_iterator})</button>
           </hstack>
           <button appearance="success" onPress={async function () {
-            const currentUser = await context.reddit.getCurrentUser(), subreddit = await context.reddit.getCurrentSubreddit();
-            if (currentUser && subreddit) {
-              context.ui.showToast("Submitting your post - upon completion you'll navigate there.");
-              const post = await context.reddit.submitPost({
-                title: `u/${currentUser.username}'s new snoo (${context.appVersion})`,
-                subredditName: subreddit.name, preview: create_preview(context.appVersion),
-              });
-              context.redis.set(`user-iterator-${post.id}`, JSON.stringify({
-                bottoms_iterator, glasses_iterator, grippables_iterator,
-                hats_iterator, tops_iterator, color
-              }));
-              context.ui.navigateTo(post);
-            } else {
-              context.ui.showToast("Sorry. only accounts with username can post");
-            }
+            context.ui.showForm(titleForm);
           }}>share it! (make a post about it)</button>
         </>;
         break;
