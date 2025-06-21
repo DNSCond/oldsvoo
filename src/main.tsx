@@ -4,7 +4,18 @@ import { svgBuilder } from './assets-function.ts';
 
 Devvit.configure({ redditAPI: true, redis: true });
 
-// Devvit.addSettings([{type: 'boolean', name: 'sticky', label: 'add a stickied comment with an explanation of snoovatarcreator?',},]);
+Devvit.addSettings([
+  {
+    type: 'boolean', name: 'sticky',
+    label: 'add a stickied comment with an explanation of snoovatarcreator?',
+    defaultValue: true,
+  },
+  {
+    type: 'boolean', name: 'basicWhite',
+    label: 'allow the upload of the basic white snoo?',
+    defaultValue: true,
+  },
+]);
 
 // Add a menu item to the subreddit menu for instantiating the new experience post
 Devvit.addMenuItem({
@@ -100,7 +111,7 @@ Devvit.addCustomPostType({
       }
     });
     const titleForm = useForm({
-      title: 'PostSettings', description: 'what to allow or not on your post',
+      title: 'Configuate Post', description: 'something to add to your post',
       fields: [
         {
           type: "string",
@@ -113,9 +124,10 @@ Devvit.addCustomPostType({
           //helpText: "if true then users can leave ratings on your post, if false then the cant. this WILL NOT disable reddit\'s own voting",
           helpText: 'currently ratings are disabled'
         }*/
-      ], acceptLabel: 'submit', cancelLabel: 'cancel',
+      ], acceptLabel: 'CREATE post', cancelLabel: 'cancel',
     }, async function (values) {
-      const currentUser = await context.reddit.getCurrentUsername(), subredditName = await context.reddit.getCurrentSubredditName();
+      const currentUser = await context.reddit.getCurrentUsername(),
+        subredditName = await context.reddit.getCurrentSubredditName();
       if (currentUser && subredditName) {
         const title = `(u/${currentUser}): ` + values.title;
         context.ui.showToast(`Submitting! ${title}`);
@@ -127,8 +139,7 @@ Devvit.addCustomPostType({
           hats_iterator, tops_iterator, color, allowRatings,
         }));
         context.ui.navigateTo(post);
-        // if (await context.settings.get('sticky'))
-        {
+        if (await context.settings.get('sticky')) {
           let text = `Hello, u/${currentUser}.\n\nThanks for using [snoovatar creator](https://developers.reddit.com/apps/snoovatarcreator)`;
           text += ` (A devvit app created by antboiy).\n\nDevvit app posts are marked by the green APP Symbol and interactable\n\n\`${Date()}\``;
           await (await post.addComment({ text })).distinguish(true);
@@ -234,11 +245,9 @@ Devvit.addCustomPostType({
                 }} icon="star">3</button>
                 <button appearance={appearance_rating} onPress={function () {
                   duato(4);
-                  context.ui.showToast("are you pressing butone");
                 }} icon="star">4</button>
                 <button appearance={appearance_rating} onPress={function () {
                   duato(5);
-                  context.ui.showToast('window');
                 }} icon="star">5</button>
               </hstack>
             </>) : <></>}
@@ -262,9 +271,21 @@ Devvit.addCustomPostType({
             <button appearance={category === 'tops' ? "primary" : "secondary"} onPress={setNewCategory('tops')}>tops ({tops_iterator})</button>
             <button appearance={category === 'bottoms' ? "primary" : "secondary"} onPress={setNewCategory('bottoms')}>bottoms ({bottoms_iterator})</button>
           </hstack>
-          <button appearance="success" onPress={async function () {
-            context.ui.showForm(titleForm);
-          }}>share it! (make a post about it)</button>
+          <hstack gap="medium">
+            <button appearance="success" onPress={async function () {
+              if (
+                bottoms_iterator === 0 &&
+                glasses_iterator === 0 &&
+                grippables_iterator === 0
+                && hats_iterator === 0 &&
+                tops_iterator === 0) {
+                if (!await context.settings.get('basicWhite')) {
+                  return context.ui.showToast('please be more creative');
+                }
+              }
+              context.ui.showForm(titleForm);
+            }}>post it!</button>
+          </hstack>
         </>;
         break;
     }
