@@ -23,6 +23,10 @@ a post "u/[username]'s new snoo" will be created. this post will display the con
 
 note x.x.x.Y versions are development versions and not recorded
 
+### 0.3.3: updated Devvit
+
+- updated Devvit
+
 ### 0.3.2: updated ReadMe
 
 - updated ReadMe
