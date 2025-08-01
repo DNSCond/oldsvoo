@@ -1,5 +1,6 @@
 // Learn more at developers.reddit.com/docs
-import { Devvit, useState, useAsync, useForm } from '@devvit/public-api';
+import { Devvit, useState, useAsync, useForm, JobContext, TriggerContext, Configuration } from '@devvit/public-api';
+import { Datetime_global } from 'datetime_global/Datetime_global.js';
 import { svgBuilder } from './assets-function.ts';
 
 Devvit.configure({ redditAPI: true, redis: true });
@@ -15,6 +16,12 @@ Devvit.addSettings([
     label: 'allow the upload of the basic white snoo?',
     defaultValue: true,
   },
+  {
+    type: 'boolean', name: 'puzzleDaily',
+    label: 'post daily radom snoo?',
+    helpText: 'at 13:00 UTC',
+    defaultValue: false,
+  },
 ]);
 
 // Add a menu item to the subreddit menu for instantiating the new experience post
@@ -28,27 +35,36 @@ Devvit.addMenuItem({
 
     const subredditName = await reddit.getCurrentSubredditName();
     const post = await reddit.submitPost({
-      title: `Snoovatar creator (${context.appVersion})`,
-      subredditName, preview: create_preview(context.appVersion),
+      preview: create_preview(zero_conf()),
+      title: `Snoovatar creator`,
+      subredditName,
     });
     ui.navigateTo(post);
   },
 });
-
-function create_preview(appVersion: string) {
-  const bottoms_iterator = 0, glasses_iterator = 0, grippables_iterator = 0, hats_iterator = 0, tops_iterator = 0,
-    svgElement = svgBuilder(bottoms_iterator, glasses_iterator, grippables_iterator, hats_iterator, tops_iterator, "#ffffff");
+type configurationData = { bottoms_iterator: number, glasses_iterator: number, grippables_iterator: number, hats_iterator: number, tops_iterator: number, color: string };
+type saveData = configurationData & { allowRatings?: boolean };
+function zero_conf(): configurationData {
+  const number = 0;
+  return {
+    bottoms_iterator: number,
+    glasses_iterator: number,
+    grippables_iterator: number,
+    hats_iterator: number,
+    tops_iterator: number,
+    color: '#ffffff',
+  };
+}
+function create_preview(conf: configurationData) {
+  const { bottoms_iterator, glasses_iterator, grippables_iterator, hats_iterator, tops_iterator, color } = conf,
+    svgElement = svgBuilder(bottoms_iterator, glasses_iterator, grippables_iterator, hats_iterator, tops_iterator, color);
   return (
     <vstack height="100%" width="100%" gap="medium" alignment="center middle">
       <image imageWidth={400} imageHeight={400} width="200px" height="200px" url={svgElement.output} />
       <hstack gap="medium">
-        <button appearance="primary" disabled={true}>
-          &lt;
-        </button>
-        <text>loading ({appVersion})</text>
-        <button appearance="primary" disabled={true}>
-          &gt;
-        </button>
+        <button appearance="primary" disabled={true}>&lt;</button>
+        <text>loading</text>
+        <button appearance="primary" disabled={true}>&gt;</button>
       </hstack>
     </vstack>
   );
@@ -62,12 +78,47 @@ Devvit.addTrigger({
   },
 });
 
-type saveData = {
-  bottoms_iterator: number, glasses_iterator: number, grippables_iterator: number,
-  hats_iterator: number, tops_iterator: number, color: string, allowRatings?: boolean,
-};
+const dailySnoo = 'dailySnoo';
+Devvit.addTrigger({ event: 'AppInstall', async onEvent(_, context) { await update(context); }, });
+Devvit.addTrigger({ event: 'AppUpgrade', async onEvent(_, context) { await update(context); }, });
+Devvit.addSchedulerJob({
+  name: dailySnoo, async onRun(_event, context: JobContext) {
+    if (context.subredditName === undefined) return;
+    if (await context.settings.get('puzzleDaily')) {
+      const zdt = (new Datetime_global).toTimezone('UTC');
+      const title = `(u/${context.appName}): Daily Random configuation (${zdt.format('D, Y-M-d')})`;
+      const subredditName = context.subredditName, conf = {
+        grippables_iterator: getRndInteger(0, 51),
+        bottoms_iterator: getRndInteger(0, 9),
+        glasses_iterator: getRndInteger(0, 23),
+        hats_iterator: getRndInteger(0, 59),
+        tops_iterator: getRndInteger(0, 44),
+        color: '#ffffff',
+      }, post = await context.reddit.submitPost({
+        title, subredditName, preview: create_preview(conf),
+      });
+      context.redis.set(`user-iterator-${post.id}`, JSON.stringify(conf));
 
-//function returnSelf<M>(self:M):M{return self}
+      if (await context.settings.get('sticky')) {
+        let text = `This was created using [snoovatar creator](https://developers.reddit.com/apps/snoovatarcreator) (A devvit `
+          + `app created by antboiy).\n\nDevvit app posts are marked by the green APP Symbol and interactable\n\n\`${Date()}\``;
+        await (await post.addComment({ text })).distinguish(true);
+      }
+    }
+  },
+});
+
+async function update(context: TriggerContext) {
+  {
+    const oldJobId = await context.redis.get('jobId'); if (oldJobId) await context.scheduler.cancelJob(oldJobId);
+    const jobId = await context.scheduler.runJob({ name: dailySnoo, cron: '1 13 * * *', data: {}, });
+    await context.redis.set('jobId', jobId);
+  }
+}
+
+function getRndInteger(min: number, max: number): number {
+  return Math.floor(Math.random() * (max - min)) + min;
+}
 
 // Add a post type definition
 Devvit.addCustomPostType({
@@ -129,15 +180,15 @@ Devvit.addCustomPostType({
       const currentUser = await context.reddit.getCurrentUsername(),
         subredditName = await context.reddit.getCurrentSubredditName();
       if (currentUser && subredditName) {
-        const title = `(u/${currentUser}): ` + values.title;
-        context.ui.showToast(`Submitting! ${title}`);
-        const post = await context.reddit.submitPost({
-          title, subredditName, preview: create_preview(context.appVersion),
-        }), allowRatings = false;//values.allowRatings;
-        context.redis.set(`user-iterator-${post.id}`, JSON.stringify({
+        const allowRatings = false;//values.allowRatings;
+        const title = `(u/${currentUser}): ` + values.title, conf: configurationData & { allowRatings: boolean } = {
           bottoms_iterator, glasses_iterator, grippables_iterator,
           hats_iterator, tops_iterator, color, allowRatings,
-        }));
+        };
+        context.ui.showToast(`Submitting! ${title}`);
+        const post = await context.reddit.submitPost({
+          title, subredditName, preview: create_preview(conf),
+        }); context.redis.set(`user-iterator-${post.id}`, JSON.stringify(conf));
         context.ui.navigateTo(post);
         if (await context.settings.get('sticky')) {
           let text = `Hello, u/${currentUser}.\n\nThanks for using [snoovatar creator](https://developers.reddit.com/apps/snoovatarcreator)`;

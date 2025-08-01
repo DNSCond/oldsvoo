@@ -23,6 +23,11 @@ a post "u/[username]'s new snoo" will be created. this post will display the con
 
 note x.x.x.Y versions are development versions and not recorded
 
+### 0.3.4: added daily random configuration
+
+- added daily random configuration.
+- a moderator can turn this off in the app settings.
+
 ### 0.3.3: updated Devvit
 
 - updated Devvit
